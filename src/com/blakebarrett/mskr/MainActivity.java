@@ -175,6 +175,15 @@ public class MainActivity extends Activity {
 				Environment.DIRECTORY_PICTURES).getAbsolutePath()
 				+ "/" + System.currentTimeMillis() + "_mskr.png";
 		MaskedBitmap.save(filename, bitmap);
+		dispatchMediaScanIntent(filename);
+	}
+
+	private void dispatchMediaScanIntent(final String filename) {
+		Intent mediaScanIntent = new Intent(
+				Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+		Uri contentUri = Uri.parse(filename);
+		mediaScanIntent.setData(contentUri);
+		getApplicationContext().sendBroadcast(mediaScanIntent);
 	}
 
 	private Bitmap getMask(final int resId) {
