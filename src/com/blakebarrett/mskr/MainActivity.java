@@ -1,5 +1,6 @@
 package com.blakebarrett.mskr;
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 
@@ -18,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ImageButton;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
@@ -53,8 +55,8 @@ public class MainActivity extends Activity {
 			break;
 		case R.id.action_save:
 			save(maskedBitmap);
-			return super.onOptionsItemSelected(item);
-		case R.id.action_settings:
+			break;
+		case R.id.action_about:
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -65,6 +67,7 @@ public class MainActivity extends Activity {
 		imageButton = (ImageButton) findViewById(R.id.previewImage);
 		imageButton.setMaxHeight(imageButton.getWidth());
 		imageButton.setImageResource(R.drawable.mskr_add);
+		imageButton.setClickable(true);
 
 		final Spinner spinner = (Spinner) findViewById(R.id.select_mask);
 		spinner.setSelection(0);
@@ -106,9 +109,10 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (data == null) {
+		if ((resultCode != RESULT_OK) || (data == null)) {
 			return;
 		}
+		imageButton.setClickable(false);
 		final Uri uri = data.getData();
 		sourceBitmap = getBitmapFromUri(uri);
 
@@ -121,8 +125,9 @@ public class MainActivity extends Activity {
 			@Override
 			public void onItemSelected(AdapterView<?> parentView,
 					View selectedItemView, int position, long id) {
-				final String selectedItemName = spinner.getItemAtPosition(
-						position).toString();
+
+				final String selectedItemName = ((TextView) selectedItemView)
+						.getText().toString();
 				selectedMask = findMaskByName(selectedItemName);
 
 				applyMaskToImage(sourceBitmap, selectedMask);
@@ -173,15 +178,16 @@ public class MainActivity extends Activity {
 	private void save(final Bitmap bitmap) {
 		final String filename = Environment.getExternalStoragePublicDirectory(
 				Environment.DIRECTORY_PICTURES).getAbsolutePath()
-				+ "/" + System.currentTimeMillis() + "_mskr.png";
+				+ "/" + System.currentTimeMillis() + "_mskr.jpg";
 		MaskedBitmap.save(filename, bitmap);
 		dispatchMediaScanIntent(filename);
 	}
 
 	private void dispatchMediaScanIntent(final String filename) {
-		Intent mediaScanIntent = new Intent(
+		final Intent mediaScanIntent = new Intent(
 				Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-		Uri contentUri = Uri.parse(filename);
+		final File file = new File(filename);
+		final Uri contentUri = Uri.fromFile(file);
 		mediaScanIntent.setData(contentUri);
 		getApplicationContext().sendBroadcast(mediaScanIntent);
 	}

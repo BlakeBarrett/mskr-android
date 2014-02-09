@@ -130,7 +130,7 @@ public class MaskedBitmap {
 	public static void save(final String filename, final Bitmap image) {
 		try {
 			final FileOutputStream out = new FileOutputStream(filename);
-			image.compress(Bitmap.CompressFormat.PNG, 100, out);
+			image.compress(Bitmap.CompressFormat.JPEG, 100, out);
 			out.close();
 		} catch (Exception e) {
 			e.printStackTrace();
