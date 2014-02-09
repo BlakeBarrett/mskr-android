@@ -39,8 +39,8 @@ public class MainActivity extends Activity {
 			public void onClick(View v) {
 				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
 				intent.setType("image/*");
-				startActivityForResult(
-						Intent.createChooser(intent, "Select a photo"), 1);
+				startActivityForResult(Intent.createChooser(intent,
+						getString(R.string.select_an_image)), 1);
 			}
 		});
 	}
@@ -49,7 +49,13 @@ public class MainActivity extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		final Uri uri = data.getData();
 		final Bitmap selectedBitmap = getBitmapFromUri(uri);
-		imageButton.setImageBitmap(selectedBitmap);
+
+		final Bitmap mask = BitmapFactory.decodeResource(getResources(),
+				R.drawable.crclmsk);
+
+		final Bitmap maskedBitmap = MaskedBitmap.draw(selectedBitmap, mask);
+
+		imageButton.setImageBitmap(maskedBitmap);
 	}
 
 	private Bitmap getBitmapFromUri(final Uri uri) {
