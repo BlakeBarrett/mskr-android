@@ -1,5 +1,7 @@
 package com.blakebarrett.mskr;
 
+import java.io.FileOutputStream;
+
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -32,25 +34,26 @@ public class MaskedBitmap {
 
 	public static Bitmap draw(final Bitmap source, final Bitmap mask) {
 
-		Bitmap maskedBitmap = source.copy(source.getConfig(), true);
-		final Canvas canvas = new Canvas(maskedBitmap);
+		Bitmap scaledMask = Bitmap.createScaledBitmap(mask, source.getWidth(),
+				source.getHeight(), true);
+		final Canvas canvas = new Canvas(source);
 		final Paint paint = new Paint(Paint.FILTER_BITMAP_FLAG);
 		paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
-		canvas.drawBitmap(mask, 0, 0, paint);
+		canvas.drawBitmap(scaledMask, 0, 0, paint);
 
-		// Canvas canvas = new Canvas(this.source);
-		// Paint paint = new Paint();
-		// paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
-		// // TODO: convert this.mask into paint.
-		// canvas.drawBitmap(
-		// this.source,
-		// null,
-		// new Rect(0, 0, this.source.getWidth(), this.source.getHeight()),
-		// paint);
-
-		source.recycle();
 		mask.recycle();
+		scaledMask.recycle();
 
-		return maskedBitmap;
+		return source;
+	}
+
+	public static void save(final String filename, final Bitmap image) {
+		try {
+			final FileOutputStream out = new FileOutputStream(filename);
+			image.compress(Bitmap.CompressFormat.PNG, 100, out);
+			out.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
