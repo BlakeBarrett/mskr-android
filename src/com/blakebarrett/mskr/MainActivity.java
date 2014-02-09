@@ -45,7 +45,7 @@ public class MainActivity extends Activity {
 		case R.id.action_add_layer:
 			break;
 		case R.id.action_save:
-			save();
+			save(maskedBitmap);
 			return super.onOptionsItemSelected(item);
 		case R.id.action_settings:
 		default:
@@ -85,11 +85,11 @@ public class MainActivity extends Activity {
 		imageButton.setImageBitmap(maskedBitmap);
 	}
 
-	private void save() {
+	private void save(final Bitmap bitmap) {
 		final String filename = Environment.getExternalStoragePublicDirectory(
 				Environment.DIRECTORY_PICTURES).getAbsolutePath()
 				+ "/" + System.currentTimeMillis() + "_mskr.png";
-		MaskedBitmap.save(filename, maskedBitmap);
+		MaskedBitmap.save(filename, bitmap);
 	}
 
 	private Bitmap getMask(final int resId) {
@@ -99,11 +99,12 @@ public class MainActivity extends Activity {
 
 	private Bitmap getBitmapFromUri(final Uri uri) {
 		try {
-			ParcelFileDescriptor parcelFileDescriptor = getContentResolver()
+			final ParcelFileDescriptor parcelFileDescriptor = getContentResolver()
 					.openFileDescriptor(uri, "r");
-			FileDescriptor fileDescriptor = parcelFileDescriptor
+			final FileDescriptor fileDescriptor = parcelFileDescriptor
 					.getFileDescriptor();
-			Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+			final Bitmap image = BitmapFactory
+					.decodeFileDescriptor(fileDescriptor);
 			parcelFileDescriptor.close();
 			return image.copy(image.getConfig(), true);
 		} catch (IOException ex) {
