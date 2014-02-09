@@ -11,7 +11,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 
 public class MaskedBitmap {
-	private static final int LONGEST_EDGE = 1920;
+	private static final int MAXIMUM_IMGE_SIZE = 1920;
 
 	/**
 	 * Here are some links!
@@ -75,10 +75,10 @@ public class MaskedBitmap {
 
 	public static Bitmap draw(final Bitmap source, final Bitmap mask) {
 
-		Bitmap scaledMask = makeItSquare(LONGEST_EDGE, mask,
+		Bitmap scaledMask = makeItSquare(MAXIMUM_IMGE_SIZE, mask,
 				SquareMode.LETTERBOX);
 
-		Bitmap maskedBitmap = makeItSquare(LONGEST_EDGE, source,
+		Bitmap maskedBitmap = makeItSquare(MAXIMUM_IMGE_SIZE, source,
 				SquareMode.CROP);
 
 		final Canvas canvas = new Canvas(maskedBitmap);
@@ -86,8 +86,10 @@ public class MaskedBitmap {
 		final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
 		canvas.drawBitmap(scaledMask, 0, 0, paint);
+		paint.setXfermode(null);
 
 		scaledMask.recycle();
+		mask.recycle();
 
 		return maskedBitmap;
 	}

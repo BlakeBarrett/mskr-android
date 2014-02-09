@@ -83,6 +83,10 @@ public class MainActivity extends Activity {
 		if (this.maskedBitmap == null) {
 			return;
 		}
+
+		this.sourceBitmap.recycle();
+		this.sourceBitmap = null;
+
 		this.sourceBitmap = this.maskedBitmap;
 		applyMaskToImage(sourceBitmap, selectedMask);
 	}
@@ -133,6 +137,8 @@ public class MainActivity extends Activity {
 	}
 
 	private int findMaskByName(final String name) {
+		// Anyone who knows me will know how much I hate this.
+		// Why can't you switch on Strings in Java 1.6!?
 		if ("sqr".equals(name)) {
 			return R.drawable.sqrmsk;
 		} else if ("crcl".equals(name)) {
@@ -185,7 +191,7 @@ public class MainActivity extends Activity {
 			final Bitmap image = BitmapFactory
 					.decodeFileDescriptor(fileDescriptor);
 			parcelFileDescriptor.close();
-			return image.copy(image.getConfig(), true);
+			return image;
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
