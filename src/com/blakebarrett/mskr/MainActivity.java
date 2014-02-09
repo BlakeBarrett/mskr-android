@@ -28,7 +28,7 @@ public class MainActivity extends Activity {
 
 	private ImageButton imageButton;
 	private Bitmap maskedBitmap;
-	private Bitmap sourceBitmap;
+	private Uri sourceBitmapUri;
 	private int selectedMask = R.drawable.crclmsk;
 
 	@Override
@@ -80,22 +80,13 @@ public class MainActivity extends Activity {
 			maskedBitmap.recycle();
 			maskedBitmap = null;
 		}
-		if (this.sourceBitmap != null) {
-			sourceBitmap.recycle();
-			sourceBitmap = null;
-		}
 	}
 
 	private void addLayer() {
 		if (this.maskedBitmap == null) {
 			return;
 		}
-
-		this.sourceBitmap.recycle();
-		this.sourceBitmap = null;
-
-		this.sourceBitmap = this.maskedBitmap;
-		applyMaskToImage(sourceBitmap, selectedMask);
+		applyMaskToImage(maskedBitmap, selectedMask);
 	}
 
 	/**
@@ -137,18 +128,14 @@ public class MainActivity extends Activity {
 			return;
 		}
 		imageButton.setClickable(false);
-		final Uri uri = data.getData();
-		if (sourceBitmap != null) {
-			sourceBitmap.recycle();
-			sourceBitmap = null;
-		}
+		sourceBitmapUri = data.getData();
+
 		if (maskedBitmap != null) {
 			maskedBitmap.recycle();
 			maskedBitmap = null;
 		}
-		sourceBitmap = getBitmapFromUri(uri);
 
-		applyMaskToImage(sourceBitmap, selectedMask);
+		applyMaskToImage(getBitmapFromUri(sourceBitmapUri), selectedMask);
 	}
 
 	private void addMaskChangeListener() {
@@ -160,9 +147,9 @@ public class MainActivity extends Activity {
 
 				final String selectedItemName = ((TextView) selectedItemView)
 						.getText().toString();
-				selectedMask = findMaskByName(selectedItemName);
 
-				applyMaskToImage(sourceBitmap, selectedMask);
+				selectedMask = findMaskByName(selectedItemName);
+				applyMaskToImage(maskedBitmap, selectedMask);
 			}
 
 			@Override
@@ -203,7 +190,8 @@ public class MainActivity extends Activity {
 		if (bitmap == null) {
 			return;
 		}
-		maskedBitmap = MaskedBitmap.draw(bitmap, getMask(maskId));
+		maskedBitmap = MaskedBitmap.draw(bitmap, getMask(maskId)).copy(
+				bitmap.getConfig(), true);
 		imageButton.setImageBitmap(maskedBitmap);
 	}
 
