@@ -14,18 +14,24 @@ import android.os.ParcelFileDescriptor;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 
 public class MainActivity extends Activity {
 
 	private ImageButton imageButton;
 	private Bitmap maskedBitmap;
+	private Bitmap sourceBitmap;
+	private int selectedMask = R.drawable.crclmsk;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		addImageClickListener();
+		addMaskChangeListener();
 	}
 
 	@Override
@@ -43,6 +49,7 @@ public class MainActivity extends Activity {
 			createNew();
 			break;
 		case R.id.action_add_layer:
+			addLayer();
 			break;
 		case R.id.action_save:
 			save(maskedBitmap);
@@ -56,10 +63,28 @@ public class MainActivity extends Activity {
 
 	private void createNew() {
 		imageButton = (ImageButton) findViewById(R.id.previewImage);
+		imageButton.setMaxHeight(imageButton.getWidth());
 		imageButton.setImageResource(R.drawable.mskr_add);
+
+		final Spinner spinner = (Spinner) findViewById(R.id.select_mask);
+		spinner.setSelection(0);
+
 		if (this.maskedBitmap != null) {
 			maskedBitmap.recycle();
+			maskedBitmap = null;
 		}
+		if (this.sourceBitmap != null) {
+			sourceBitmap.recycle();
+			sourceBitmap = null;
+		}
+	}
+
+	private void addLayer() {
+		if (this.maskedBitmap == null) {
+			return;
+		}
+		this.sourceBitmap = this.maskedBitmap;
+		applyMaskToImage(sourceBitmap, selectedMask);
 	}
 
 	private void addImageClickListener() {
@@ -77,11 +102,65 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (data == null) {
+			return;
+		}
 		final Uri uri = data.getData();
+		sourceBitmap = getBitmapFromUri(uri);
 
-		maskedBitmap = MaskedBitmap.draw(getBitmapFromUri(uri),
-				getMask(R.drawable.crclmsk));
+		applyMaskToImage(sourceBitmap, selectedMask);
+	}
 
+	private void addMaskChangeListener() {
+		final Spinner spinner = (Spinner) findViewById(R.id.select_mask);
+		spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> parentView,
+					View selectedItemView, int position, long id) {
+				final String selectedItemName = spinner.getItemAtPosition(
+						position).toString();
+				selectedMask = findMaskByName(selectedItemName);
+
+				applyMaskToImage(sourceBitmap, selectedMask);
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parentView) {
+
+			}
+
+		});
+	}
+
+	private int findMaskByName(final String name) {
+		if ("sqr".equals(name)) {
+			return R.drawable.sqrmsk;
+		} else if ("crcl".equals(name)) {
+			return R.drawable.crclmsk;
+		} else if ("trngl".equals(name)) {
+			return R.drawable.trnglmsk;
+		} else if ("POW".equals(name)) {
+			return R.drawable.powmsk;
+		} else if ("plrd".equals(name)) {
+			return R.drawable.plrdmsk;
+		} else if ("x".equals(name)) {
+			return R.drawable.xmsk;
+		} else if ("eqlty".equals(name)) {
+			return R.drawable.eqltymsk;
+		} else if ("hrt".equals(name)) {
+			return R.drawable.hrtmsk;
+		} else if ("dmnd".equals(name)) {
+			return R.drawable.dmndmsk;
+		} else {
+			return R.drawable.crclmsk;
+		}
+	}
+
+	private void applyMaskToImage(final Bitmap bitmap, final int maskId) {
+		if (bitmap == null) {
+			return;
+		}
+		maskedBitmap = MaskedBitmap.draw(bitmap, getMask(maskId));
 		imageButton.setImageBitmap(maskedBitmap);
 	}
 

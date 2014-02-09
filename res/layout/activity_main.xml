@@ -19,4 +19,24 @@
         android:scaleType="fitCenter"
         android:src="@drawable/mskr_add" />
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true" >
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onSelectedMaskChange"
+            android:text="@string/select_a_mask"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <Spinner
+            android:id="@+id/select_mask"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:entries="@array/all_masks" />
+    </LinearLayout>
+
 </RelativeLayout>
