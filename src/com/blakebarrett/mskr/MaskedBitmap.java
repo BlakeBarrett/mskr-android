@@ -12,7 +12,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 
 public class MaskedBitmap {
-	private static final int MAXIMUM_IMGE_SIZE = 1920;
+	public static int MAXIMUM_IMGE_SIZE = 1920;
 
 	/**
 	 * Here are some links!
@@ -82,16 +82,18 @@ public class MaskedBitmap {
 		final Bitmap croppedSource = makeItSquare(MAXIMUM_IMGE_SIZE, source,
 				SquareMode.CROP);
 
-		return merge(createBackgroundLayer(croppedSource),
+		return mergeAndDestroy(createBackgroundLayer(croppedSource),
 				applyMaskToBitmap(croppedSource, scaledMask));
 	}
 
-	private static Bitmap merge(final Bitmap... bitmaps) {
+	private static Bitmap mergeAndDestroy(final Bitmap... bitmaps) {
 		final Bitmap merged = Bitmap.createBitmap(bitmaps[0].getWidth(),
 				bitmaps[0].getHeight(), bitmaps[0].getConfig());
 		final Canvas canvas = new Canvas(merged);
 		for (int i = 0; i < bitmaps.length; i++) {
 			canvas.drawBitmap(bitmaps[i], new Matrix(), null);
+			bitmaps[i].recycle();
+			bitmaps[i] = null;
 		}
 		return merged;
 	}

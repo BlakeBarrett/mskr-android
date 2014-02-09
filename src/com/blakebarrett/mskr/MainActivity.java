@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,6 +23,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
+
+	private static final String TAG = "com.blakebarrett.mskr.MainActivity";
 
 	private ImageButton imageButton;
 	private Bitmap maskedBitmap;
@@ -34,6 +37,7 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		addImageClickListener();
 		addMaskChangeListener();
+		calculateMaximumImageSizeForAvailableMemory();
 	}
 
 	@Override
@@ -94,6 +98,26 @@ public class MainActivity extends Activity {
 		applyMaskToImage(sourceBitmap, selectedMask);
 	}
 
+	/**
+	 * TODO: This still sucks.
+	 */
+	private void calculateMaximumImageSizeForAvailableMemory() {
+		long freeMemory = Runtime.getRuntime().maxMemory();
+		long mask = (1024 * 1024 * 2);
+		int numberOfBitmapsUsedDuringCalculation = 3;
+		int maxLength = (int) (Math.sqrt(freeMemory - mask) / numberOfBitmapsUsedDuringCalculation);
+
+		MaskedBitmap.MAXIMUM_IMGE_SIZE = Math.min(Math.max(512, maxLength),
+				1920);
+
+		Log.d(TAG,
+				"Max length of image has been determined to be: "
+						+ String.valueOf(maxLength));
+
+		// because the rest of the calculation sucks.
+		MaskedBitmap.MAXIMUM_IMGE_SIZE = 1920;
+	}
+
 	private void addImageClickListener() {
 		createNew();
 		imageButton.setOnClickListener(new View.OnClickListener() {
@@ -114,6 +138,14 @@ public class MainActivity extends Activity {
 		}
 		imageButton.setClickable(false);
 		final Uri uri = data.getData();
+		if (sourceBitmap != null) {
+			sourceBitmap.recycle();
+			sourceBitmap = null;
+		}
+		if (maskedBitmap != null) {
+			maskedBitmap.recycle();
+			maskedBitmap = null;
+		}
 		sourceBitmap = getBitmapFromUri(uri);
 
 		applyMaskToImage(sourceBitmap, selectedMask);
@@ -179,8 +211,19 @@ public class MainActivity extends Activity {
 		final String filename = Environment.getExternalStoragePublicDirectory(
 				Environment.DIRECTORY_PICTURES).getAbsolutePath()
 				+ "/" + System.currentTimeMillis() + "_mskr.jpg";
+		createFile(filename);
 		MaskedBitmap.save(filename, bitmap);
 		dispatchMediaScanIntent(filename);
+	}
+
+	private File createFile(final String filename) {
+		File temp = new File(filename);
+		try {
+			temp.createNewFile();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return temp;
 	}
 
 	private void dispatchMediaScanIntent(final String filename) {
@@ -193,8 +236,7 @@ public class MainActivity extends Activity {
 	}
 
 	private Bitmap getMask(final int resId) {
-		final Bitmap temp = BitmapFactory.decodeResource(getResources(), resId);
-		return temp.copy(temp.getConfig(), true);
+		return BitmapFactory.decodeResource(getResources(), resId);
 	}
 
 	private Bitmap getBitmapFromUri(final Uri uri) {
