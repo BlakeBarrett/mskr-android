@@ -4,10 +4,13 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapFactory.Options;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -51,7 +54,7 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
 		switch (item.getItemId()) {
-		case R.id.action_new:
+		case R.id.action_delete:
 			createNew();
 			break;
 		case R.id.action_add_layer:
@@ -98,7 +101,7 @@ public class MainActivity extends Activity {
 		int numberOfBitmapsUsedDuringCalculation = 3;
 		int maxLength = (int) (Math.sqrt(freeMemory - mask) / numberOfBitmapsUsedDuringCalculation);
 
-		MaskedBitmap.MAXIMUM_IMGE_SIZE = Math.min(Math.max(512, maxLength),
+		MaskedBitmap.MAXIMUM_IMAGE_SIZE = Math.min(Math.max(512, maxLength),
 				1920);
 
 		Log.d(TAG,
@@ -106,7 +109,7 @@ public class MainActivity extends Activity {
 						+ String.valueOf(maxLength));
 
 		// because the rest of the calculation sucks.
-		MaskedBitmap.MAXIMUM_IMGE_SIZE = 1920;
+		MaskedBitmap.MAXIMUM_IMAGE_SIZE = 1920;
 	}
 
 	private void addImageClickListener() {
@@ -227,14 +230,21 @@ public class MainActivity extends Activity {
 		return BitmapFactory.decodeResource(getResources(), resId);
 	}
 
+	@SuppressLint("NewApi")
 	private Bitmap getBitmapFromUri(final Uri uri) {
 		try {
 			final ParcelFileDescriptor parcelFileDescriptor = getContentResolver()
 					.openFileDescriptor(uri, "r");
 			final FileDescriptor fileDescriptor = parcelFileDescriptor
 					.getFileDescriptor();
-			final Bitmap image = BitmapFactory
-					.decodeFileDescriptor(fileDescriptor);
+			final Options opts = new Options();
+			opts.inMutable = true;
+			opts.inPreferQualityOverSpeed = true;
+			opts.inPurgeable = true;
+			final Rect rect = new Rect(0, 0, MaskedBitmap.MAXIMUM_IMAGE_SIZE,
+					MaskedBitmap.MAXIMUM_IMAGE_SIZE);
+			final Bitmap image = BitmapFactory.decodeFileDescriptor(
+					fileDescriptor, rect, opts);
 			parcelFileDescriptor.close();
 			return image;
 		} catch (IOException ex) {

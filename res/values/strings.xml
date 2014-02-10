@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">mskr</string>
-    <string name="action_new">New</string>
+    <string name="action_delete">Delete</string>
     <string name="action_add_layer">Add Layer</string>
     <string name="action_save">Save</string>
     <string name="action_about">About</string>
