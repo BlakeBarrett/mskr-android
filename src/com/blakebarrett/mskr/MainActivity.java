@@ -4,13 +4,10 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.BitmapFactory.Options;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -230,21 +227,14 @@ public class MainActivity extends Activity {
 		return BitmapFactory.decodeResource(getResources(), resId);
 	}
 
-	@SuppressLint("NewApi")
 	private Bitmap getBitmapFromUri(final Uri uri) {
 		try {
 			final ParcelFileDescriptor parcelFileDescriptor = getContentResolver()
 					.openFileDescriptor(uri, "r");
 			final FileDescriptor fileDescriptor = parcelFileDescriptor
 					.getFileDescriptor();
-			final Options opts = new Options();
-			opts.inMutable = true;
-			opts.inPreferQualityOverSpeed = true;
-			opts.inPurgeable = true;
-			final Rect rect = new Rect(0, 0, MaskedBitmap.MAXIMUM_IMAGE_SIZE,
-					MaskedBitmap.MAXIMUM_IMAGE_SIZE);
-			final Bitmap image = BitmapFactory.decodeFileDescriptor(
-					fileDescriptor, rect, opts);
+			final Bitmap image = BitmapFactory
+					.decodeFileDescriptor(fileDescriptor);
 			parcelFileDescriptor.close();
 			return image;
 		} catch (IOException ex) {
