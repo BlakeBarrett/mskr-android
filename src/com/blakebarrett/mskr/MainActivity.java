@@ -61,6 +61,8 @@ public class MainActivity extends Activity {
 			save(maskedBitmap);
 			break;
 		case R.id.action_about:
+			launchAboutActivity();
+			break;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -87,6 +89,11 @@ public class MainActivity extends Activity {
 			return;
 		}
 		applyMaskToImage(maskedBitmap, selectedMask);
+	}
+
+	private void launchAboutActivity() {
+		Intent intent = new Intent(this, AboutActivity.class);
+		startActivity(intent);
 	}
 
 	/**
