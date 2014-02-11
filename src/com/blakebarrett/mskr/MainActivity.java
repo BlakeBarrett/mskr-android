@@ -63,6 +63,9 @@ public class MainActivity extends Activity {
 		case R.id.action_about:
 			launchAboutActivity();
 			break;
+		case R.id.action_share:
+			share(save(maskedBitmap));
+			break;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -202,13 +205,14 @@ public class MainActivity extends Activity {
 		imageButton.setImageBitmap(maskedBitmap);
 	}
 
-	private void save(final Bitmap bitmap) {
+	private File save(final Bitmap bitmap) {
 		final String filename = Environment.getExternalStoragePublicDirectory(
 				Environment.DIRECTORY_PICTURES).getAbsolutePath()
 				+ "/" + System.currentTimeMillis() + "_mskr.jpg";
-		createFile(filename);
+		File file = createFile(filename);
 		MaskedBitmap.save(filename, bitmap);
-		dispatchMediaScanIntent(filename);
+		dispatchMediaScanIntent(file);
+		return file;
 	}
 
 	private File createFile(final String filename) {
@@ -221,13 +225,21 @@ public class MainActivity extends Activity {
 		return temp;
 	}
 
-	private void dispatchMediaScanIntent(final String filename) {
-		final Intent mediaScanIntent = new Intent(
+	private void dispatchMediaScanIntent(final File file) {
+		Intent mediaScanIntent = new Intent(
 				Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-		final File file = new File(filename);
-		final Uri contentUri = Uri.fromFile(file);
+		Uri contentUri = Uri.fromFile(file);
 		mediaScanIntent.setData(contentUri);
 		getApplicationContext().sendBroadcast(mediaScanIntent);
+	}
+
+	private void share(final File file) {
+		Intent shareIntent = new Intent();
+		shareIntent.setAction(Intent.ACTION_SEND);
+		shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+		shareIntent.setType("image/jpeg");
+		startActivity(Intent.createChooser(shareIntent,
+				getResources().getText(R.string.action_share)));
 	}
 
 	private Bitmap getMask(final int resId) {
