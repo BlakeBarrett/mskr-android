@@ -1,18 +1,16 @@
 package com.blakebarrett.mskr;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.IOException;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.ParcelFileDescriptor;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,9 +20,9 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-public class MainActivity extends Activity {
+import com.blakebarrett.mskr.MaskedBitmap.SquareMode;
 
-	private static final String TAG = "com.blakebarrett.mskr.MainActivity";
+public class MainActivity extends Activity {
 
 	private ImageButton imageButton;
 	private Bitmap maskedBitmap;
@@ -37,7 +35,6 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		addImageClickListener();
 		addMaskChangeListener();
-		calculateMaximumImageSizeForAvailableMemory();
 	}
 
 	@Override
@@ -91,32 +88,12 @@ public class MainActivity extends Activity {
 		if (this.maskedBitmap == null) {
 			return;
 		}
-		applyMaskToImage(maskedBitmap, selectedMask);
+		maskedBitmap = applyMaskToImage(maskedBitmap, selectedMask);
 	}
 
 	private void launchAboutActivity() {
 		Intent intent = new Intent(this, AboutActivity.class);
 		startActivity(intent);
-	}
-
-	/**
-	 * TODO: This still sucks.
-	 */
-	private void calculateMaximumImageSizeForAvailableMemory() {
-		long freeMemory = Runtime.getRuntime().maxMemory();
-		long mask = (1024 * 1024 * 2);
-		int numberOfBitmapsUsedDuringCalculation = 3;
-		int maxLength = (int) (Math.sqrt(freeMemory - mask) / numberOfBitmapsUsedDuringCalculation);
-
-		MaskedBitmap.MAXIMUM_IMAGE_SIZE = Math.min(Math.max(512, maxLength),
-				1920);
-
-		Log.d(TAG,
-				"Max length of image has been determined to be: "
-						+ String.valueOf(maxLength));
-
-		// because the rest of the calculation sucks.
-		MaskedBitmap.MAXIMUM_IMAGE_SIZE = 1920;
 	}
 
 	private void addImageClickListener() {
@@ -145,7 +122,8 @@ public class MainActivity extends Activity {
 			maskedBitmap = null;
 		}
 
-		applyMaskToImage(getBitmapFromUri(sourceBitmapUri), selectedMask);
+		maskedBitmap = getBitmapFromUri(sourceBitmapUri);
+		applyMaskToImage(maskedBitmap, selectedMask);
 	}
 
 	private void addMaskChangeListener() {
@@ -196,13 +174,14 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	private void applyMaskToImage(final Bitmap bitmap, final int maskId) {
+	private Bitmap applyMaskToImage(final Bitmap bitmap, final int maskId) {
 		if (bitmap == null) {
-			return;
+			return null;
 		}
-		maskedBitmap = MaskedBitmap.draw(bitmap, getMask(maskId)).copy(
-				bitmap.getConfig(), true);
-		imageButton.setImageBitmap(maskedBitmap);
+		Bitmap temp = MaskedBitmap.draw(bitmap.copy(Config.ARGB_8888, true),
+				getMask(maskId)).copy(Config.ARGB_8888, true);
+		imageButton.setImageBitmap(temp);
+		return temp;
 	}
 
 	private File save(final Bitmap bitmap) {
@@ -243,22 +222,12 @@ public class MainActivity extends Activity {
 	}
 
 	private Bitmap getMask(final int resId) {
-		return BitmapFactory.decodeResource(getResources(), resId);
+		Bitmap mask = BitmapFactory.decodeResource(getResources(), resId);
+		return MaskedBitmap.makeItSquare(MaskedBitmap.MAXIMUM_IMAGE_SIZE, mask,
+				SquareMode.LETTERBOX);
 	}
 
 	private Bitmap getBitmapFromUri(final Uri uri) {
-		try {
-			final ParcelFileDescriptor parcelFileDescriptor = getContentResolver()
-					.openFileDescriptor(uri, "r");
-			final FileDescriptor fileDescriptor = parcelFileDescriptor
-					.getFileDescriptor();
-			final Bitmap image = BitmapFactory
-					.decodeFileDescriptor(fileDescriptor);
-			parcelFileDescriptor.close();
-			return image;
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
-		return null;
+		return BitmapLoadingUtils.getBitmapFromUri(this, uri);
 	}
 }

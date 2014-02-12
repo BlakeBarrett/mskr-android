@@ -12,7 +12,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 
 public class MaskedBitmap {
-	public static int MAXIMUM_IMAGE_SIZE = 1920;
+	public static int MAXIMUM_IMAGE_SIZE = 1024;
 
 	/**
 	 * Here are some links!
@@ -36,11 +36,11 @@ public class MaskedBitmap {
 		draw(source, mask);
 	}
 
-	private enum SquareMode {
+	enum SquareMode {
 		CROP, LETTERBOX;
 	}
 
-	private static Bitmap makeItSquare(final int size, final Bitmap source,
+	static Bitmap makeItSquare(final int size, final Bitmap source,
 			final SquareMode mode) {
 
 		float originalWidth = source.getWidth();
@@ -72,20 +72,20 @@ public class MaskedBitmap {
 		final Canvas canvas = new Canvas(background);
 		canvas.drawBitmap(source, transformation, paint);
 
-		source.recycle();
+		// source.recycle();
 
 		return background;
 	}
 
 	public static Bitmap draw(final Bitmap source, final Bitmap mask) {
-		final Bitmap scaledMask = makeItSquare(MAXIMUM_IMAGE_SIZE, mask,
-				SquareMode.LETTERBOX);
+		// final Bitmap scaledMask = makeItSquare(MAXIMUM_IMAGE_SIZE, mask,
+		// SquareMode.LETTERBOX);
 
-		final Bitmap croppedSource = makeItSquare(MAXIMUM_IMAGE_SIZE, source,
-				SquareMode.CROP);
+		// final Bitmap croppedSource = makeItSquare(MAXIMUM_IMAGE_SIZE, source,
+		// SquareMode.CROP);
 
-		return mergeAndDestroy(createBackgroundLayer(croppedSource),
-				applyMaskToBitmap(croppedSource, scaledMask));
+		return mergeAndDestroy(createBackgroundLayer(source),
+				applyMaskToBitmap(source, mask));
 	}
 
 	private static Bitmap mergeAndDestroy(final Bitmap... bitmaps) {
@@ -94,8 +94,8 @@ public class MaskedBitmap {
 		final Canvas canvas = new Canvas(merged);
 		for (int i = 0; i < bitmaps.length; i++) {
 			canvas.drawBitmap(bitmaps[i], new Matrix(), null);
-			bitmaps[i].recycle();
-			bitmaps[i] = null;
+			// bitmaps[i].recycle();
+			// bitmaps[i] = null;
 		}
 		return merged;
 	}
@@ -105,13 +105,14 @@ public class MaskedBitmap {
 				source.getHeight(), source.getConfig());
 
 		final Canvas canvas = new Canvas();
-		canvas.drawColor(Color.WHITE);
 		canvas.setBitmap(temp);
+		canvas.drawColor(Color.WHITE);
 
 		final Paint paint = new Paint(Paint.DITHER_FLAG);
 		paint.setAlpha(128);
+		paint.setStyle(Paint.Style.FILL);
+
 		canvas.drawBitmap(source, new Matrix(), paint);
-		paint.setXfermode(null);
 
 		return temp;
 	}
@@ -126,7 +127,7 @@ public class MaskedBitmap {
 		canvas.drawBitmap(mask, 0, 0, paint);
 		paint.setXfermode(null);
 
-		mask.recycle();
+		// mask.recycle();
 
 		return source;
 	}
