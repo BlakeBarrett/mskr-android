@@ -28,6 +28,7 @@ public class MainActivity extends Activity {
 	private Bitmap maskedBitmap;
 	private Uri sourceBitmapUri;
 	private int selectedMask = R.drawable.crclmsk;
+	private File saved;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -55,13 +56,16 @@ public class MainActivity extends Activity {
 			addLayer();
 			break;
 		case R.id.action_save:
-			save(maskedBitmap);
+			saved = save(maskedBitmap);
 			break;
 		case R.id.action_about:
 			launchAboutActivity();
 			break;
 		case R.id.action_share:
-			share(save(maskedBitmap));
+			if (saved == null) {
+				saved = save(maskedBitmap);
+			}
+			share(saved);
 			break;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -89,6 +93,7 @@ public class MainActivity extends Activity {
 			return;
 		}
 		maskedBitmap = applyMaskToImage(maskedBitmap, selectedMask);
+		saved = null;
 	}
 
 	private void launchAboutActivity() {
@@ -124,6 +129,7 @@ public class MainActivity extends Activity {
 
 		maskedBitmap = getBitmapFromUri(sourceBitmapUri);
 		applyMaskToImage(maskedBitmap, selectedMask);
+		saved = null;
 	}
 
 	private void addMaskChangeListener() {
@@ -138,6 +144,7 @@ public class MainActivity extends Activity {
 
 				selectedMask = findMaskByName(selectedItemName);
 				applyMaskToImage(maskedBitmap, selectedMask);
+				saved = null;
 			}
 
 			@Override

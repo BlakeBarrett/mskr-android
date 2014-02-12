@@ -72,7 +72,7 @@ public class MaskedBitmap {
 		final Canvas canvas = new Canvas(background);
 		canvas.drawBitmap(source, transformation, paint);
 
-		// source.recycle();
+		source.recycle();
 
 		return background;
 	}
@@ -127,7 +127,7 @@ public class MaskedBitmap {
 		canvas.drawBitmap(mask, 0, 0, paint);
 		paint.setXfermode(null);
 
-		// mask.recycle();
+		mask.recycle();
 
 		return source;
 	}

@@ -10,7 +10,7 @@
     <string name="click_to_load_image">Click to load image</string>
     <string name="select_an_image">Select an Image</string>
     <string name="share_image">Share Image</string>
-    <string name="select_a_mask">Select a Mask</string>
+    <string name="select_a_mask">msk:</string>
 
     <string-array name="all_masks">
         <item>sqr</item>
