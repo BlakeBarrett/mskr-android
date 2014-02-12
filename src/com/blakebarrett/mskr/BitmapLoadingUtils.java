@@ -8,6 +8,7 @@ import java.io.InputStream;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapFactory.Options;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 
@@ -33,6 +34,30 @@ public class BitmapLoadingUtils {
 		return null;
 	}
 
+	public static Bitmap getDownsampledResource(Context ctx, int resId) {
+		Options outDimens = null;
+		BitmapFactory.Options outBitmap = null;
+		try {
+			outDimens = getBitmapDimensions(ctx, resId);
+			int sampleSize = calculateSampleSize(outDimens.outWidth,
+					outDimens.outHeight, MaskedBitmap.MAXIMUM_IMAGE_SIZE,
+					MaskedBitmap.MAXIMUM_IMAGE_SIZE);
+
+			outBitmap = new BitmapFactory.Options();
+			outBitmap.inJustDecodeBounds = false; // the decoder will return a
+													// bitmap
+			outBitmap.inSampleSize = sampleSize;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		Bitmap mask = BitmapFactory.decodeResource(ctx.getResources(), resId,
+				outBitmap);
+		return MaskedBitmap.makeItSquare(MaskedBitmap.MAXIMUM_IMAGE_SIZE, mask,
+				SquareMode.LETTERBOX);
+	}
+
 	public static Bitmap getDownsampledBitmap(Context ctx, Uri uri,
 			int targetWidth, int targetHeight) {
 		Bitmap bitmap = null;
@@ -52,15 +77,30 @@ public class BitmapLoadingUtils {
 	}
 
 	private static BitmapFactory.Options getBitmapDimensions(Context ctx,
-			Uri uri) throws FileNotFoundException, IOException {
+			int resId) throws FileNotFoundException, IOException {
 		BitmapFactory.Options outDimens = new BitmapFactory.Options();
 		outDimens.inJustDecodeBounds = true; // the decoder will return null (no
 												// bitmap)
 
+		// if Options requested only the size will be returned
+		Bitmap temp = BitmapFactory.decodeResource(ctx.getResources(), resId,
+				outDimens);
+		temp.recycle();
+
+		return outDimens;
+	}
+
+	private static BitmapFactory.Options getBitmapDimensions(Context ctx,
+			Uri uri) throws FileNotFoundException, IOException {
+		BitmapFactory.Options outDimens = new BitmapFactory.Options();
+		outDimens.inJustDecodeBounds = true; // the decoder will return null (no
+		// bitmap)
+
 		InputStream is = ctx.getContentResolver().openInputStream(uri);
 		// if Options requested only the size will be returned
-		BitmapFactory.decodeStream(is, null, outDimens);
+		Bitmap temp = BitmapFactory.decodeStream(is, null, outDimens);
 		is.close();
+		temp.recycle();
 
 		return outDimens;
 	}
