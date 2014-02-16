@@ -71,6 +71,7 @@ public class BitmapLoadingUtils {
 
 		} catch (Exception e) {
 			// handle the exception(s)
+			e.printStackTrace();
 		}
 
 		return bitmap;

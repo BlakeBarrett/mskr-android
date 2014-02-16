@@ -29,6 +29,7 @@ public class MainActivity extends Activity {
 	private Uri sourceBitmapUri;
 	private int selectedMask = R.drawable.crclmsk;
 	private File saved;
+	private String filename;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +37,7 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		addImageClickListener();
 		addMaskChangeListener();
+		addToolbarItemsClickListeners();
 	}
 
 	@Override
@@ -63,7 +65,7 @@ public class MainActivity extends Activity {
 			break;
 		case R.id.action_share:
 			if (saved == null) {
-				saved = save(maskedBitmap);
+				saved = save(applyMaskToImage(maskedBitmap, selectedMask));
 			}
 			share(saved);
 			break;
@@ -73,7 +75,46 @@ public class MainActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 
+	private void addToolbarItemsClickListeners() {
+		findViewById(R.id.addLayerButton).setOnClickListener(
+				new View.OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						if (maskedBitmap != null) {
+							addLayer();
+						}
+					}
+				});
+		findViewById(R.id.saveImageButton).setOnClickListener(
+				new View.OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						if (maskedBitmap != null) {
+							saved = save(applyMaskToImage(maskedBitmap,
+									selectedMask));
+						}
+					}
+				});
+		findViewById(R.id.deleteImageButton).setOnClickListener(
+				new View.OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						if (maskedBitmap != null) {
+							createNew();
+						}
+					}
+				});
+	}
+
 	private void createNew() {
+		// create filename for this composition
+		filename = Environment.getExternalStoragePublicDirectory(
+				Environment.DIRECTORY_PICTURES).getAbsolutePath()
+				+ "/" + System.currentTimeMillis() + "_mskr.jpg";
+
 		imageButton = (ImageButton) findViewById(R.id.previewImage);
 		imageButton.setMaxHeight(imageButton.getWidth());
 		imageButton.setImageResource(R.drawable.mskr_add);
@@ -120,6 +161,9 @@ public class MainActivity extends Activity {
 			return;
 		}
 		imageButton.setClickable(false);
+
+		findViewById(R.id.controls_layout).setClickable(true);
+
 		sourceBitmapUri = data.getData();
 
 		if (maskedBitmap != null) {
@@ -192,9 +236,6 @@ public class MainActivity extends Activity {
 	}
 
 	private File save(final Bitmap bitmap) {
-		final String filename = Environment.getExternalStoragePublicDirectory(
-				Environment.DIRECTORY_PICTURES).getAbsolutePath()
-				+ "/" + System.currentTimeMillis() + "_mskr.jpg";
 		File file = createFile(filename);
 		MaskedBitmap.save(filename, bitmap);
 		dispatchMediaScanIntent(file);
@@ -204,6 +245,10 @@ public class MainActivity extends Activity {
 	private File createFile(final String filename) {
 		File temp = new File(filename);
 		try {
+			// overwrite anything with the same filename.
+			if (temp.exists()) {
+				temp.delete();
+			}
 			temp.createNewFile();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -212,9 +257,9 @@ public class MainActivity extends Activity {
 	}
 
 	private void dispatchMediaScanIntent(final File file) {
-		Intent mediaScanIntent = new Intent(
+		final Intent mediaScanIntent = new Intent(
 				Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-		Uri contentUri = Uri.fromFile(file);
+		final Uri contentUri = Uri.fromFile(file);
 		mediaScanIntent.setData(contentUri);
 		getApplicationContext().sendBroadcast(mediaScanIntent);
 	}

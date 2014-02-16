@@ -9,25 +9,66 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
 
-    <LinearLayout
-        android:id="@+id/toolbar_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
+    <RelativeLayout
+        android:id="@+id/controls_layout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
 
-        <TextView
-            android:id="@+id/about_text_view"
+        <LinearLayout
+            android:id="@+id/mask_selector_toolbar_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="onSelectedMaskChange"
-            android:text="@string/select_a_mask"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:layout_alignParentLeft="true"
+            android:layout_gravity="left"
+            android:clickable="false"
+            android:orientation="horizontal" >
 
-        <Spinner
-            android:id="@+id/select_mask"
+            <TextView
+                android:id="@+id/about_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onSelectedMaskChange"
+                android:text="@string/select_a_mask"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <Spinner
+                android:id="@+id/select_mask"
+                android:layout_width="88dp"
+                android:layout_height="wrap_content"
+                android:entries="@array/all_masks" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/toolbar_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:entries="@array/all_masks" />
-    </LinearLayout>
+            android:layout_alignParentRight="true"
+            android:layout_gravity="right"
+            android:orientation="horizontal" >
+
+            <ImageButton
+                android:id="@+id/addLayerButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/action_add_layer"
+                android:src="@drawable/ic_action_add" />
+
+            <ImageButton
+                android:id="@+id/saveImageButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/action_save"
+                android:src="@drawable/ic_action_save" />
+
+            <ImageButton
+                android:id="@+id/deleteImageButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/action_delete"
+                android:src="@drawable/ic_action_delete" />
+        </LinearLayout>
+    </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="wrap_content"
