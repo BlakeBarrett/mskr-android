@@ -37,7 +37,6 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		addImageClickListener();
 		addMaskChangeListener();
-		addToolbarItemsClickListeners();
 	}
 
 	@Override
@@ -52,13 +51,19 @@ public class MainActivity extends Activity {
 		// Handle item selection
 		switch (item.getItemId()) {
 		case R.id.action_delete:
-			createNew();
+			if (maskedBitmap != null) {
+				createNew();
+			}
 			break;
 		case R.id.action_add_layer:
-			addLayer();
+			if (maskedBitmap != null) {
+				addLayer();
+			}
 			break;
 		case R.id.action_save:
-			saved = save(maskedBitmap);
+			if (maskedBitmap != null) {
+				saved = save(applyMaskToImage(maskedBitmap, selectedMask));
+			}
 			break;
 		case R.id.action_about:
 			launchAboutActivity();
@@ -73,40 +78,6 @@ public class MainActivity extends Activity {
 			return super.onOptionsItemSelected(item);
 		}
 		return super.onOptionsItemSelected(item);
-	}
-
-	private void addToolbarItemsClickListeners() {
-		findViewById(R.id.addLayerButton).setOnClickListener(
-				new View.OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						if (maskedBitmap != null) {
-							addLayer();
-						}
-					}
-				});
-		findViewById(R.id.saveImageButton).setOnClickListener(
-				new View.OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						if (maskedBitmap != null) {
-							saved = save(applyMaskToImage(maskedBitmap,
-									selectedMask));
-						}
-					}
-				});
-		findViewById(R.id.deleteImageButton).setOnClickListener(
-				new View.OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						if (maskedBitmap != null) {
-							createNew();
-						}
-					}
-				});
 	}
 
 	private void createNew() {
@@ -161,8 +132,6 @@ public class MainActivity extends Activity {
 			return;
 		}
 		imageButton.setClickable(false);
-
-		findViewById(R.id.controls_layout).setClickable(true);
 
 		sourceBitmapUri = data.getData();
 

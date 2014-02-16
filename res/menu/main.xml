@@ -2,13 +2,13 @@
 
     <item
         android:id="@+id/action_add_layer"
-        android:icon="@drawable/ic_action_add"
+        android:icon="@drawable/ic_action_add_light"
         android:orderInCategory="100"
         android:showAsAction="always"
         android:title="@string/action_add_layer"/>
     <item
         android:id="@+id/action_save"
-        android:icon="@drawable/ic_action_save"
+        android:icon="@drawable/ic_action_save_light"
         android:orderInCategory="100"
         android:showAsAction="always"
         android:title="@string/action_save"/>
@@ -20,13 +20,13 @@
         android:title="@string/action_share"/>
     <item
         android:id="@+id/action_delete"
-        android:icon="@drawable/ic_action_delete"
+        android:icon="@drawable/ic_action_delete_light"
         android:orderInCategory="100"
         android:showAsAction="always"
         android:title="@string/action_delete"/>
     <item
         android:id="@+id/action_about"
-        android:icon="@drawable/ic_action_about"
+        android:icon="@drawable/ic_action_about_light"
         android:orderInCategory="100"
         android:showAsAction="always"
         android:title="@string/action_about"/>
