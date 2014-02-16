@@ -10,6 +10,9 @@
     <string name="click_to_load_image">Click to load image</string>
     <string name="select_an_image">Select an Image</string>
     <string name="share_image">Share Image</string>
+    <string name="out_of_memory_title">Out of memory</string>
+    <string name="out_of_memory_message">Oh noes! It looks like the selected image is too big to be loaded.</string>
+    <string name="okay">Okay :(</string>
     <string name="select_a_mask">msk:</string>
 
     <string-array name="all_masks">

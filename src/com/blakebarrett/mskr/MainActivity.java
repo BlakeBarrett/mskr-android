@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -243,12 +245,39 @@ public class MainActivity extends Activity {
 	}
 
 	private Bitmap getMask(final int resId) {
-		Bitmap mask = BitmapFactory.decodeResource(getResources(), resId);
-		return MaskedBitmap.makeItSquare(MaskedBitmap.MAXIMUM_IMAGE_SIZE, mask,
-				SquareMode.LETTERBOX);
+		try {
+			Bitmap mask = BitmapFactory.decodeResource(getResources(), resId);
+			return MaskedBitmap.makeItSquare(MaskedBitmap.MAXIMUM_IMAGE_SIZE,
+					mask, SquareMode.LETTERBOX);
+		} catch (OutOfMemoryError e) {
+			e.printStackTrace();
+			onOutOfMemory();
+		}
+		return null;
 	}
 
 	private Bitmap getBitmapFromUri(final Uri uri) {
-		return BitmapLoadingUtils.getBitmapFromUri(this, uri);
+		try {
+			return BitmapLoadingUtils.getBitmapFromUri(this, uri);
+		} catch (OutOfMemoryError e) {
+			e.printStackTrace();
+			onOutOfMemory();
+		}
+		return null;
+	}
+
+	private void onOutOfMemory() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(getString(R.string.out_of_memory_title));
+		builder.setMessage(getString(R.string.out_of_memory_message));
+		builder.setPositiveButton(R.string.okay,
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						createNew();
+						dialog.cancel();
+					}
+				});
+		builder.create().show();
 	}
 }
