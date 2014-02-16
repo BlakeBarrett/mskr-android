@@ -28,7 +28,7 @@
         android:id="@+id/action_about"
         android:icon="@drawable/ic_action_about_light"
         android:orderInCategory="100"
-        android:showAsAction="always"
+        android:showAsAction="ifRoom"
         android:title="@string/action_about"/>
 
 </menu>
