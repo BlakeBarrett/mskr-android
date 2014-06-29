@@ -13,6 +13,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,7 +29,6 @@ public class MainActivity extends Activity {
 
 	private ImageButton imageButton;
 	private Bitmap maskedBitmap;
-	private Uri sourceBitmapUri;
 	private int selectedMask = R.drawable.crclmsk;
 	private File saved;
 	private String filename;
@@ -122,8 +122,21 @@ public class MainActivity extends Activity {
 			public void onClick(View v) {
 				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
 				intent.setType("image/*");
-				startActivityForResult(Intent.createChooser(intent,
-						getString(R.string.select_an_image)), 1);
+				// intent.putExtra("crop", "true");
+				intent.putExtra("aspectX", 1);
+				intent.putExtra("aspectY", 1);
+				intent.putExtra("outputX", MaskedBitmap.MAXIMUM_IMAGE_SIZE);
+				intent.putExtra("outputY", MaskedBitmap.MAXIMUM_IMAGE_SIZE);
+				intent.putExtra("scale", "true");
+				intent.putExtra("return-data", "true");
+				intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.parse(filename));
+				intent.putExtra("outputFormat",
+						Bitmap.CompressFormat.JPEG.toString());
+				intent.putExtra("noFaceDetection", "true");
+
+				Intent chooserIntent = Intent.createChooser(intent,
+						getString(R.string.select_an_image));
+				startActivityForResult(chooserIntent, 1);
 			}
 		});
 	}
@@ -135,7 +148,7 @@ public class MainActivity extends Activity {
 		}
 		imageButton.setClickable(false);
 
-		sourceBitmapUri = data.getData();
+		final Uri sourceBitmapUri = data.getData();
 
 		if (maskedBitmap != null) {
 			maskedBitmap.recycle();
@@ -261,7 +274,14 @@ public class MainActivity extends Activity {
 			return BitmapLoadingUtils.getBitmapFromUri(this, uri);
 		} catch (OutOfMemoryError e) {
 			e.printStackTrace();
-			onOutOfMemory();
+			try {
+				return BitmapLoadingUtils.getDownsampledBitmap(this, uri,
+						MaskedBitmap.MAXIMUM_IMAGE_SIZE,
+						MaskedBitmap.MAXIMUM_IMAGE_SIZE);
+			} catch (OutOfMemoryError e2) {
+				e2.printStackTrace();
+				onOutOfMemory();
+			}
 		}
 		return null;
 	}
